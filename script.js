@@ -67,16 +67,19 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-contactForm.addEventListener("submit", (event) => {
+contactForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const name = contactForm.elements.name;
   const email = contactForm.elements.email;
+  const company = contactForm.elements.company;
   const message = contactForm.elements.message;
+  const submitButton = contactForm.querySelector("button[type='submit']");
   let isValid = true;
 
   [name, email, message].forEach(clearError);
   formStatus.textContent = "";
+  formStatus.classList.remove("error");
 
   if (!name.value.trim()) {
     showError(name, "Please enter your name.");
@@ -100,13 +103,52 @@ contactForm.addEventListener("submit", (event) => {
     return;
   }
 
-  formStatus.textContent = "Thank you. Your message is ready to be connected to Supabase.";
-  contactForm.reset();
+  const formData = {
+    name: name.value.trim(),
+    email: email.value.trim(),
+    company: company.value.trim(),
+    message: message.value.trim(),
+  };
+
+  // Opening index.html locally cannot run Cloudflare Pages Functions.
+  if (window.location.protocol === "file:") {
+    formStatus.textContent = "Thank you. Your message is ready to be connected to Supabase.";
+    contactForm.reset();
+    return;
+  }
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Sending...";
+
+  try {
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(result.error || "Message could not be sent.");
+    }
+
+    formStatus.textContent = "Thank you. Your message has been sent.";
+    contactForm.reset();
+  } catch (error) {
+    formStatus.classList.add("error");
+    formStatus.textContent = error.message || "Something went wrong. Please email me directly.";
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit";
+  }
 });
 
 contactForm.querySelectorAll("input, textarea").forEach((field) => {
   field.addEventListener("input", () => {
     clearError(field);
     formStatus.textContent = "";
+    formStatus.classList.remove("error");
   });
 });
