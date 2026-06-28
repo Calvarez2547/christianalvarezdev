@@ -3,6 +3,24 @@ const navMenu = document.querySelector(".nav-menu");
 const navLinks = document.querySelectorAll(".nav-links a");
 const contactForm = document.querySelector("#contact-form");
 const formStatus = document.querySelector("#form-status");
+const darkToggle = document.getElementById("dark-toggle");
+
+function applyTheme(dark) {
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  darkToggle.textContent = dark ? "☀" : "☾";
+  darkToggle.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+}
+
+const savedTheme = localStorage.getItem("theme");
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+let isDark = savedTheme ? savedTheme === "dark" : prefersDark;
+applyTheme(isDark);
+
+darkToggle.addEventListener("click", () => {
+  isDark = !isDark;
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+  applyTheme(isDark);
+});
 
 function closeMobileMenu() {
   navMenu.classList.remove("open");
@@ -67,7 +85,7 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-contactForm.addEventListener("submit", async (event) => {
+if (contactForm) contactForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const name = contactForm.elements.name;
@@ -145,7 +163,7 @@ contactForm.addEventListener("submit", async (event) => {
   }
 });
 
-contactForm.querySelectorAll("input, textarea").forEach((field) => {
+if (contactForm) contactForm.querySelectorAll("input, textarea").forEach((field) => {
   field.addEventListener("input", () => {
     clearError(field);
     formStatus.textContent = "";

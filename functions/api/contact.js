@@ -1,3 +1,17 @@
+const rateLimitMap = new Map();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+  const timestamps = (rateLimitMap.get(ip) || []).filter((t) => t > windowStart);
+  if (timestamps.length >= RATE_LIMIT_MAX) return true;
+  timestamps.push(now);
+  rateLimitMap.set(ip, timestamps);
+  return false;
+}
+
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -22,7 +36,12 @@ export async function onRequest(context) {
     return jsonResponse({ error: "Method not allowed." }, 405);
   }
 
-  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  if (isRateLimited(ip)) {
+    return jsonResponse({ error: "Too many requests. Please try again later." }, 429);
+  }
+
+  if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
     return jsonResponse({ error: "Supabase is not configured yet." }, 500);
   }
 
@@ -31,6 +50,10 @@ export async function onRequest(context) {
   try {
     body = await request.json();
   } catch {
+    return jsonResponse({ error: "Invalid request body." }, 400);
+  }
+
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
     return jsonResponse({ error: "Invalid request body." }, 400);
   }
 
@@ -48,7 +71,7 @@ export async function onRequest(context) {
   }
 
   const supabaseUrl = env.SUPABASE_URL.replace(/\/$/, "");
-  const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseKey = env.SUPABASE_ANON_KEY;
   const payload = {
     name,
     email,
@@ -56,16 +79,21 @@ export async function onRequest(context) {
     message,
   };
 
-  const supabaseResponse = await fetch(`${supabaseUrl}/rest/v1/contact_messages`, {
-    method: "POST",
-    headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-      "Content-Type": "application/json",
-      Prefer: "return=minimal",
-    },
-    body: JSON.stringify(payload),
-  });
+  let supabaseResponse;
+  try {
+    supabaseResponse = await fetch(`${supabaseUrl}/rest/v1/contact_messages`, {
+      method: "POST",
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    return jsonResponse({ error: "Message could not be saved." }, 500);
+  }
 
   if (!supabaseResponse.ok) {
     return jsonResponse({ error: "Message could not be saved." }, 500);
