@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --color-bg: #ffffff;
   --color-surface: #ffffff;
   --color-text: #111111;
@@ -28,6 +29,7 @@ body {
   color: var(--color-text);
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.6;
+  transition: background-color 250ms ease, color 250ms ease;
 }
 
 img {
@@ -266,19 +268,33 @@ textarea {
 .social-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: 12px;
   margin-top: 24px;
 }
 
 .social-links a {
-  color: #111111;
-  font-weight: 800;
-  transition: color 180ms ease;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  color: #222222;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: color 180ms ease, border-color 180ms ease;
 }
 
 .social-links a:hover,
 .social-links a:focus {
   color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.availability-note {
+  margin: 16px 0 0;
+  color: var(--color-accent);
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .hero-media {
@@ -387,10 +403,9 @@ textarea {
 }
 
 .project-card {
-  display: grid;
-  grid-template-columns: 70px 1fr;
-  gap: 22px;
-  min-height: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
   padding: 28px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius);
@@ -416,14 +431,72 @@ textarea {
   font-weight: 900;
 }
 
+.project-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 .project-card h3 {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 1.14rem;
 }
 
 .project-card p {
   margin: 0;
   color: var(--color-muted);
+}
+
+.project-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.project-tags {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-tags li {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 6px;
+  background: var(--color-soft);
+  color: #474747;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.btn-sm {
+  min-height: 38px;
+  padding: 0 15px;
+  font-size: 0.875rem;
+}
+
+.wip-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  min-height: 38px;
+  border-radius: var(--radius);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .tags {
@@ -468,8 +541,28 @@ textarea {
 
 .skills-grid {
   display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.skill-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skill-group-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.skill-tags {
+  display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 10px;
 }
 
 .experience-list {
@@ -628,6 +721,12 @@ textarea:focus {
   font-weight: 800;
 }
 
+.footer-links {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
 @media (max-width: 980px) {
   .nav-toggle {
     display: block;
@@ -736,7 +835,6 @@ textarea:focus {
   }
 
   .project-card {
-    grid-template-columns: 1fr;
     padding: 24px;
   }
 
@@ -749,4 +847,115 @@ textarea:focus {
     justify-content: center;
     text-align: center;
   }
+}
+
+/* ===== Dark Mode ===== */
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0f0f0f;
+  --color-surface: #1a1a1a;
+  --color-text: #efefef;
+  --color-muted: #a0a0a0;
+  --color-soft: #242424;
+  --color-line: #2d2d2d;
+  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .site-header {
+  background: rgba(15, 15, 15, 0.96);
+}
+
+[data-theme="dark"] .nav-links a {
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .social-links a {
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .intro-line {
+  color: var(--color-muted);
+}
+
+[data-theme="dark"] .hero-subtitle {
+  color: var(--color-muted);
+}
+
+[data-theme="dark"] .btn-outline {
+  background: transparent;
+  color: var(--color-accent);
+}
+
+[data-theme="dark"] .btn-outline:hover,
+[data-theme="dark"] .btn-outline:focus {
+  background: var(--color-accent);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .photo-card {
+  background: var(--color-surface);
+}
+
+[data-theme="dark"] .photo-placeholder {
+  background: linear-gradient(135deg, #1e1e1e, #252525);
+}
+
+[data-theme="dark"] .project-tags li {
+  color: var(--color-muted);
+}
+
+[data-theme="dark"] .tags span,
+[data-theme="dark"] .skills-grid span {
+  color: var(--color-muted);
+}
+
+[data-theme="dark"] .experience-item {
+  background: var(--color-surface);
+}
+
+[data-theme="dark"] .resume-section {
+  background: #141414;
+}
+
+[data-theme="dark"] label {
+  color: var(--color-text);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea {
+  background: var(--color-surface);
+  border-color: var(--color-line);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .nav-menu {
+  background: var(--color-bg);
+}
+
+[data-theme="dark"] .form-status {
+  color: #4ade80;
+}
+
+/* Dark mode toggle button */
+.dark-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.dark-toggle:hover,
+.dark-toggle:focus {
+  border-color: var(--color-accent);
+  outline: none;
 }
